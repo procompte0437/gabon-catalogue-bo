@@ -95,6 +95,9 @@
         .btn-primary { background: var(--blue-dark); color: white; }
         .btn-ghost { background: transparent; color: var(--black); border: 1.5px solid var(--mustard-deep); }
         .btn-tiny { padding: 8px 10px; border-radius: 9px; font-size: 12.5px; }
+        /* Sur les fonds noirs (lignes et cartes), le bouton contour passe en moutarde clair pour rester lisible. */
+        .line .btn-ghost, .article-card .btn-ghost { color: var(--mustard-pale); border-color: var(--mustard); }
+        .line .btn-ghost:hover, .article-card .btn-ghost:hover { background: rgba(212, 160, 23, 0.18); }
         .btn-danger { background: transparent; color: var(--red-dark); border: 1.5px solid var(--red-dark); }
         .line {
             display: grid; grid-template-columns: 42px minmax(0, 1fr) 92px auto auto; gap: 8px; align-items: center;

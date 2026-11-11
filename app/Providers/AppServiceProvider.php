@@ -23,7 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('production')) {
+        // En ligne (Railway), toutes les URL générées (photos comprises) doivent être en https :
+        // Android et les navigateurs refusent les photos en http sur une page https.
+        $host = $this->app->runningInConsole() ? '' : request()->getHost();
+        $local = in_array($host, ['', '127.0.0.1', 'localhost', '::1'], true);
+        if ($this->app->environment('production') || ! $local) {
             URL::forceScheme('https');
         }
 

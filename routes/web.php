@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RubriqueController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SousRubriqueController;
+use App\Http\Controllers\MediaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +14,11 @@ Route::get('/', function () {
         ? redirect()->route('admin.dashboard')
         : redirect()->route('login');
 });
+
+// Photos des articles stockées dans la table article_images.
+Route::get('/media/{key}.jpg', [MediaController::class, 'show'])
+    ->where('key', '[a-f0-9]{32}')
+    ->name('media.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [AuthController::class, 'show'])->name('login');

@@ -34,6 +34,12 @@ class Article extends Model
             return null;
         }
 
+        // Photo stockée en base (table article_images).
+        if (str_starts_with($this->image_path, 'db/')) {
+            return url('media/'.basename($this->image_path));
+        }
+
+        // Ancienne photo sur le disque du serveur.
         return asset('storage/'.$this->image_path);
     }
 

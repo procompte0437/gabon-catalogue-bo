@@ -2,28 +2,60 @@
 
 namespace App\Services;
 
+use App\Models\ArticleImage as StoredImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use RuntimeException;
 
+/**
+ * Photos d'articles : compressées en JPEG puis enregistrées dans la table article_images.
+ * articles.image_path vaut « db/<key>.jpg ». Les anciens chemins « articles/… » (disque) restent lisibles.
+ */
 class ArticleImage
 {
     public function store(UploadedFile $file): string
     {
-        $path = 'articles/'.Str::uuid().'.jpg';
-        Storage::disk('public')->put($path, $this->toJpeg($file));
+        return $this->storeBytes($this->toJpeg($file));
+    }
 
-        return $path;
+    /** Enregistre un JPEG déjà prêt ; la clé dépend du contenu, donc un même fichier n'est stocké qu'une fois. */
+    public function storeBytes(string $jpeg, string $mime = 'image/jpeg'): string
+    {
+        $key = md5($jpeg);
+
+        StoredImage::query()->firstOrCreate(
+            ['key' => $key],
+            ['mime' => $mime, 'size' => strlen($jpeg), 'data' => base64_encode($jpeg)],
+        );
+
+        return 'db/'.$key.'.jpg';
     }
 
     public function delete(?string $path): void
     {
-        if (! $path || ! str_starts_with($path, 'articles/')) {
+        if (! $path) {
             return;
         }
 
-        Storage::disk('public')->delete($path);
+        if (str_starts_with($path, 'db/')) {
+            $key = static::keyFromPath($path);
+            // Une même photo peut servir à plusieurs articles : on ne la supprime que si plus personne ne l'utilise.
+            $stillUsed = \App\Models\Article::query()->where('image_path', $path)->count() > 1;
+            if (! $stillUsed) {
+                StoredImage::query()->where('key', $key)->delete();
+            }
+
+            return;
+        }
+
+        if (str_starts_with($path, 'articles/')) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    public static function keyFromPath(string $path): string
+    {
+        return basename(substr($path, 3), '.jpg');
     }
 
     private function toJpeg(UploadedFile $file): string
