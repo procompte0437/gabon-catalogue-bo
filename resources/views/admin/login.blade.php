@@ -120,7 +120,7 @@
         </div>
         <label class="row"><input type="checkbox" name="remember" value="1"> Rester connecté</label>
         <div class="modal-actions">
-            <a class="btn btn-ghost" href="{{ config('catalogue.frontend_url') }}">Annuler</a>
+            <a class="btn btn-ghost" href="{{ \App\Support\Catalogue::frontendUrl() }}">Annuler</a>
             <button class="btn btn-primary" type="submit">Se connecter</button>
         </div>
     </form>

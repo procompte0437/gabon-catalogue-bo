@@ -16,4 +16,8 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://127.0.0.1:5180'),
 
+    // Catalogue public en ligne, utilisé quand le back-office est ouvert en ligne
+    // et que FRONTEND_URL pointe encore vers la machine locale.
+    'frontend_url_online' => env('FRONTEND_URL_ONLINE', 'https://gabon-catalogue-production.up.railway.app'),
+
 ];

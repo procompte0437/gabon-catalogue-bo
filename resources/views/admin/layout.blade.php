@@ -138,7 +138,7 @@
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Tableau de bord</a>
             <a href="{{ route('admin.rubriques.index') }}" class="{{ request()->routeIs('admin.rubriques.*') || request()->routeIs('admin.sous.*') || request()->routeIs('admin.articles.*') ? 'active' : '' }}">Rubriques</a>
             <a href="{{ route('admin.settings.edit') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Réglages</a>
-            <a href="{{ config('catalogue.frontend_url') }}" target="_blank" rel="noopener">Voir le catalogue</a>
+            <a href="{{ \App\Support\Catalogue::frontendUrl() }}" target="_blank" rel="noopener">Voir le catalogue</a>
         </nav>
         <div class="grow"></div>
         <div class="who">{{ auth()->user()->email }}</div>
