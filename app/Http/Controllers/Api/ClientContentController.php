@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Rubrique;
+use App\Models\Setting;
 use App\Models\SousRubrique;
 use App\Services\ArticleImage;
 use App\Support\WebLink;
@@ -89,12 +91,47 @@ class ClientContentController extends Controller
         ]);
     }
 
+    /** Renommer une rubrique : réservé au mot de passe général. */
+    public function updateRubrique(Request $request, Rubrique $rubrique)
+    {
+        $request->merge([
+            'name' => trim((string) $request->input('name', '')),
+            'code' => trim((string) $request->input('code', '')),
+        ]);
+
+        $data = $request->validate([
+            'code' => ['required', 'string'],
+            'name' => ['required', 'string', 'max:40'],
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'name.max' => 'Le nom ne peut pas dépasser 40 caractères.',
+        ]);
+
+        if (! $this->matches(Setting::masterCode(), $data['code'])) {
+            throw ValidationException::withMessages(['code' => 'Code incorrect.']);
+        }
+
+        $rubrique->name = $data['name'];
+        $rubrique->save();
+
+        return response()->json([
+            'message' => 'Rubrique enregistrée.',
+            'rubrique' => $rubrique->toPublicArray(),
+        ]);
+    }
+
+    /** Accepte le code propre à l'élément, ou le mot de passe général. */
     private function assertCode(string $expected, string $given): void
     {
-        if (strlen($expected) !== strlen($given) || ! hash_equals($expected, $given)) {
+        if (! $this->matches($expected, $given) && ! $this->matches(Setting::masterCode(), $given)) {
             throw ValidationException::withMessages([
                 'code' => 'Code incorrect.',
             ]);
         }
+    }
+
+    private function matches(string $expected, string $given): bool
+    {
+        return strlen($expected) === strlen($given) && hash_equals($expected, $given);
     }
 }

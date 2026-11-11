@@ -14,6 +14,10 @@ return [
     'linked_position' => 9,
     'default_code' => '0000',
 
+    // Mot de passe général (comme l'ancien mode administrateur du prototype) : il ouvre
+    // la modification de toutes les rubriques, sous-rubriques et articles. Modifiable dans Réglages.
+    'master_code' => env('CATALOGUE_MASTER_CODE', '0110'),
+
     'frontend_url' => env('FRONTEND_URL', 'http://127.0.0.1:5180'),
 
     // Catalogue public en ligne, utilisé quand le back-office est ouvert en ligne

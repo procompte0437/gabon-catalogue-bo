@@ -9,6 +9,7 @@ Route::get('/rubriques/{rubrique}/sous-rubriques', [CatalogueController::class, 
 Route::get('/sous-rubriques/{sousRubrique}/articles', [CatalogueController::class, 'articles']);
 
 Route::middleware('throttle:10,1')->group(function () {
+    Route::put('/rubriques/{rubrique}', [ClientContentController::class, 'updateRubrique']);
     Route::put('/sous-rubriques/{sousRubrique}', [ClientContentController::class, 'updateSous']);
     Route::post('/articles/{article}', [ClientContentController::class, 'updateArticle']);
 });
