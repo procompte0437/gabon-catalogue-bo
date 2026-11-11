@@ -89,6 +89,18 @@ class CatalogueTest extends TestCase
         $this->get('/connexion')->assertOk()->assertSee('Connexion administrateur');
     }
 
+    public function test_login_form_posts_over_https_behind_the_proxy(): void
+    {
+        $this->withServerVariables([
+            'HTTPS' => 'off',
+            'HTTP_X_FORWARDED_PROTO' => 'https',
+            'HTTP_X_FORWARDED_PORT' => '443',
+        ])->get('/connexion')
+            ->assertOk()
+            ->assertSee('method="POST" action="https://', false)
+            ->assertDontSee('method="POST" action="http://', false);
+    }
+
     public function test_admin_can_rename_a_rubrique_and_mark_it_as_linked(): void
     {
         $data = $this->seedMini();
