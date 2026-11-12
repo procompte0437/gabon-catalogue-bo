@@ -25,14 +25,19 @@ class ClientContentController extends Controller
         $data = $request->validate([
             'code' => ['required', 'string'],
             'name' => ['required', 'string', 'max:40'],
+            'new_code' => ['nullable', 'regex:/^\d{4}$/'],
         ], [
             'name.required' => 'Le nom est obligatoire.',
             'name.max' => 'Le nom ne peut pas dépasser 40 caractères.',
+            'new_code.regex' => 'Le mot de passe doit contenir 4 chiffres.',
         ]);
 
         $this->assertCode($sousRubrique->code, $data['code']);
 
         $sousRubrique->name = $data['name'];
+        if (! empty($data['new_code']) && $this->matches(Setting::masterCode(), $data['code'])) {
+            $sousRubrique->code = $data['new_code'];
+        }
         $sousRubrique->save();
 
         return response()->json([
@@ -55,7 +60,9 @@ class ClientContentController extends Controller
             'title' => ['required', 'string', 'max:20'],
             'link' => ['nullable', 'string', 'max:500'],
             'image' => ['nullable', 'image', 'max:8192'],
+            'new_code' => ['nullable', 'regex:/^\d{4}$/'],
         ], [
+            'new_code.regex' => 'Le mot de passe doit contenir 4 chiffres.',
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 20 caractères.',
             'image.image' => 'Le fichier doit être une photo.',
@@ -65,6 +72,9 @@ class ClientContentController extends Controller
         $this->assertCode($article->code, $data['code']);
 
         $article->title = $data['title'];
+        if (! empty($data['new_code']) && $this->matches(Setting::masterCode(), $data['code'])) {
+            $article->code = $data['new_code'];
+        }
 
         if ($article->sousRubrique->rubrique->is_linked) {
             $article->link = WebLink::normalize($data['link'] ?? null);
