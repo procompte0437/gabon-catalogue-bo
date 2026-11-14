@@ -39,6 +39,11 @@ class Article extends Model
             return url('media/'.basename($this->image_path));
         }
 
+        // Image livrée avec l'application (ex. drapeaux des ambassades : public/flags/xx.png).
+        if (str_starts_with($this->image_path, 'flags/')) {
+            return asset($this->image_path);
+        }
+
         // Ancienne photo sur le disque du serveur.
         return asset('storage/'.$this->image_path);
     }
