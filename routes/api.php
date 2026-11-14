@@ -18,6 +18,8 @@ Route::middleware('throttle:10,1')->group(function () {
 // Mode administrateur (cadenas) : protégé par le mot de passe général.
 Route::post('/admin/login', [AdminCodeController::class, 'login'])->middleware('throttle:10,1');
 Route::middleware('throttle:60,1')->prefix('admin')->group(function () {
+    Route::post('/rubriques', [AdminCodeController::class, 'storeRubrique']);
+    Route::delete('/rubriques/{rubrique}', [AdminCodeController::class, 'destroyRubrique']);
     Route::post('/rubriques/{rubrique}/codes', [AdminCodeController::class, 'sousCodes']);
     Route::post('/sous-rubriques/{sousRubrique}/codes', [AdminCodeController::class, 'articleCodes']);
     Route::put('/sous-rubriques/{sousRubrique}/codes', [AdminCodeController::class, 'saveArticleCodes']);

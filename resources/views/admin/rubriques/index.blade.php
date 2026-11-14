@@ -16,7 +16,7 @@
                 <span class="idx">{{ $rubrique->position }}</span>
                 <span class="label">{{ $rubrique->name }}</span>
                 @if ($rubrique->is_linked)
-                    <span class="pill">Liens externes</span>
+                    <span class="pill">Avec liens</span>
                 @endif
                 <span>›</span>
             </a>

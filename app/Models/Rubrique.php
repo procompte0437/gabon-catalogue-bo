@@ -28,6 +28,13 @@ class Rubrique extends Model
         return $this->hasMany(SousRubrique::class)->orderBy('position');
     }
 
+    /** Recalcule le résumé « au moins une sous-rubrique visible ouvre des liens ». */
+    public function refreshLinked(): void
+    {
+        $this->is_linked = $this->sousRubriques()->visible()->where('is_linked', true)->exists();
+        $this->save();
+    }
+
     public function toPublicArray(): array
     {
         return [

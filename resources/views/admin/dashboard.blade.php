@@ -25,11 +25,8 @@
             Chaque rubrique contient ses sous-rubriques, et chaque sous-rubrique dix articles.
             Le code à 4 chiffres d’une sous-rubrique permet au client de la renommer.
             Le code d’un article lui permet de changer le titre et la photo.
-            @if ($linked)
-                La rubrique « {{ $linked->name }} » ouvre un site web à la place du zoom photo.
-            @else
-                Aucune rubrique n’est configurée pour ouvrir un site web.
-            @endif
+            Chaque sous-rubrique cochée « Lien » ouvre un site web à la place du zoom photo.
+            Une sous-rubrique décochée « Visible » est masquée du catalogue.
         </p>
         <p class="muted">WhatsApp affiché sur le catalogue : <strong>{{ $whatsapp }}</strong></p>
     </section>

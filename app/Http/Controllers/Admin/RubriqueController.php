@@ -32,19 +32,13 @@ class RubriqueController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:40'],
-            'is_linked' => ['required', 'boolean'],
         ], [
             'name.required' => 'Le nom est obligatoire.',
             'name.max' => 'Le nom ne peut pas dépasser 40 caractères.',
         ]);
 
         $rubrique->name = $data['name'];
-        $rubrique->is_linked = $request->boolean('is_linked');
         $rubrique->save();
-
-        if ($rubrique->is_linked) {
-            Rubrique::query()->where('id', '!=', $rubrique->id)->update(['is_linked' => false]);
-        }
 
         return back()->with('status', 'Rubrique enregistrée.');
     }

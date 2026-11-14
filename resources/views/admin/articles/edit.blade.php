@@ -25,7 +25,7 @@
                 <label for="code">Mot de passe client (4 chiffres)</label>
                 <input id="code" name="code" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}" required value="{{ old('code', $article->code) }}">
             </div>
-            @if ($article->sousRubrique->rubrique->is_linked)
+            @if ($article->sousRubrique->is_linked)
                 <div class="field">
                     <label for="link">Lien du site</label>
                     <input id="link" name="link" type="text" placeholder="https://exemple.com" value="{{ old('link', $article->link) }}">

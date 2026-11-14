@@ -49,7 +49,7 @@
                 </div>
                 <div class="meta">
                     <strong>{{ $article->title }}</strong>
-                    <p>Code {{ $article->code }}@if($sous->rubrique->is_linked && $article->link) · lien @endif</p>
+                    <p>Code {{ $article->code }}@if($sous->is_linked && $article->link) · lien @endif</p>
                     <a class="btn btn-ghost btn-tiny" href="{{ route('admin.articles.edit', $article) }}">Photo et titre</a>
                 </div>
             </article>

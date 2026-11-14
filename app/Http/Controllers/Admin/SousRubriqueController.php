@@ -36,7 +36,10 @@ class SousRubriqueController extends Controller
 
         $sousRubrique->name = $data['name'];
         $sousRubrique->code = $data['code'];
+        $sousRubrique->is_linked = $request->boolean('is_linked');
+        $sousRubrique->is_visible = $request->boolean('is_visible');
         $sousRubrique->save();
+        $sousRubrique->rubrique->refreshLinked();
 
         return back()->with('status', 'Sous-rubrique enregistrée.');
     }

@@ -101,19 +101,93 @@ class CatalogueTest extends TestCase
             ->assertDontSee('method="POST" action="http://', false);
     }
 
-    public function test_admin_can_rename_a_rubrique_and_mark_it_as_linked(): void
+    public function test_admin_can_rename_a_rubrique(): void
     {
         $data = $this->seedMini();
         $admin = User::factory()->create();
 
         $this->actingAs($admin)->put('/admin/rubriques/'.$data['rubrique']->id, [
             'name' => 'Tissus',
-            'is_linked' => '1',
         ])->assertRedirect();
 
         $this->assertSame('Tissus', $data['rubrique']->fresh()->name);
+    }
+
+    public function test_admin_sets_links_and_visibility_per_sous_rubrique(): void
+    {
+        $data = $this->seedMini();
+        $admin = User::factory()->create();
+
+        $this->actingAs($admin)->put('/admin/sous-rubriques/'.$data['sous']->id, [
+            'name' => 'Chambres',
+            'code' => '1234',
+            'is_linked' => '1',
+            'is_visible' => '1',
+        ])->assertRedirect();
+
+        $this->assertTrue($data['sous']->fresh()->is_linked);
         $this->assertTrue($data['rubrique']->fresh()->is_linked);
-        $this->assertFalse($data['linked']->fresh()->is_linked);
+        $this->getJson('/api/sous-rubriques/'.$data['sous']->id.'/articles')
+            ->assertJsonPath('rubrique.is_linked', true);
+
+        $this->actingAs($admin)->put('/admin/sous-rubriques/'.$data['sous']->id, [
+            'name' => 'Chambres',
+            'code' => '1234',
+            'is_linked' => '0',
+            'is_visible' => '0',
+        ])->assertRedirect();
+
+        $this->assertFalse($data['rubrique']->fresh()->is_linked);
+        $this->getJson('/api/rubriques/'.$data['rubrique']->id.'/sous-rubriques')
+            ->assertJsonCount(0, 'sous_rubriques');
+    }
+
+    public function test_admin_pages_show_link_and_visible_boxes(): void
+    {
+        $data = $this->seedMini();
+        $admin = User::factory()->create();
+
+        $this->actingAs($admin)->get('/admin/rubriques/'.$data['linked']->id)
+            ->assertOk()->assertSee('name="is_visible"', false)->assertSee('name="is_linked" value="1" checked', false);
+        $this->actingAs($admin)->get('/admin')->assertOk();
+        $this->actingAs($admin)->get('/admin/articles/'.$data['linkedArticle']->id.'/modifier')->assertOk()->assertSee('Lien du site');
+    }
+
+    public function test_admin_code_adds_and_deletes_a_rubrique(): void
+    {
+        $data = $this->seedMini();
+        $master = \App\Models\Setting::masterCode();
+
+        $this->postJson('/api/admin/rubriques', ['code' => '9999', 'name' => 'Pharmacies'])->assertStatus(422);
+
+        $id = $this->postJson('/api/admin/rubriques', ['code' => $master, 'name' => 'Pharmacies', 'sous_count' => 3])
+            ->assertCreated()->assertJsonPath('rubrique.name', 'Pharmacies')->json('rubrique.id');
+
+        $this->getJson('/api/rubriques/'.$id.'/sous-rubriques')->assertJsonCount(3, 'sous_rubriques');
+        $sousIds = SousRubrique::query()->where('rubrique_id', $id)->pluck('id');
+        $this->assertCount((int) config('catalogue.sous_rubriques'), $sousIds);
+        $this->assertSame($sousIds->count() * (int) config('catalogue.articles'), Article::query()->whereIn('sous_rubrique_id', $sousIds)->count());
+
+        $before = $data['linked']->fresh()->position;
+        $this->deleteJson('/api/admin/rubriques/'.$data['rubrique']->id, ['code' => $master])->assertOk();
+
+        $this->assertNull(Rubrique::query()->find($data['rubrique']->id));
+        $this->assertNull(Article::query()->find($data['article']->id));
+        $this->assertSame($before - 1, $data['linked']->fresh()->position);
+    }
+
+    public function test_long_links_are_accepted(): void
+    {
+        $data = $this->seedMini();
+        $link = 'https://www.google.com/search?q='.str_repeat('hotel+libreville+', 60);
+
+        $this->postJson('/api/articles/'.$data['linkedArticle']->id, [
+            'code' => '0000',
+            'title' => 'Hôtel',
+            'link' => $link,
+        ])->assertOk();
+
+        $this->assertSame($link, $data['linkedArticle']->fresh()->link);
     }
 
     public function test_admin_can_sign_in(): void
@@ -166,6 +240,7 @@ class CatalogueTest extends TestCase
             'position' => 1,
             'name' => 'Sites',
             'code' => '0000',
+            'is_linked' => true,
         ]);
         $linkedArticle = Article::query()->create([
             'sous_rubrique_id' => $linkedSous->id,

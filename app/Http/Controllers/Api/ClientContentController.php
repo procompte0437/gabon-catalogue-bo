@@ -58,11 +58,12 @@ class ClientContentController extends Controller
         $data = $request->validate([
             'code' => ['required', 'string'],
             'title' => ['required', 'string', 'max:20'],
-            'link' => ['nullable', 'string', 'max:500'],
+            'link' => ['nullable', 'string', 'max:4000'],
             'image' => ['nullable', 'image', 'max:8192'],
             'new_code' => ['nullable', 'regex:/^\d{4}$/'],
         ], [
             'new_code.regex' => 'Le mot de passe doit contenir 4 chiffres.',
+            'link.max' => 'Le lien ne peut pas dépasser 4000 caractères.',
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 20 caractères.',
             'image.image' => 'Le fichier doit être une photo.',
@@ -76,7 +77,7 @@ class ClientContentController extends Controller
             $article->code = $data['new_code'];
         }
 
-        if ($article->sousRubrique->rubrique->is_linked) {
+        if ($article->sousRubrique->is_linked) {
             $article->link = WebLink::normalize($data['link'] ?? null);
         }
 
@@ -97,7 +98,7 @@ class ClientContentController extends Controller
 
         return response()->json([
             'message' => 'Article enregistré.',
-            'article' => $article->toPublicArray((bool) $article->sousRubrique->rubrique->is_linked),
+            'article' => $article->toPublicArray((bool) $article->sousRubrique->is_linked),
         ]);
     }
 

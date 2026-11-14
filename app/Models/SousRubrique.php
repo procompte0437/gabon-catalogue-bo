@@ -15,13 +15,23 @@ class SousRubrique extends Model
         'position',
         'name',
         'code',
+        'is_linked',
+        'is_visible',
     ];
 
     protected function casts(): array
     {
         return [
             'position' => 'integer',
+            'is_linked' => 'boolean',
+            'is_visible' => 'boolean',
         ];
+    }
+
+    /** Ne garde que les sous-rubriques affichées dans le catalogue. */
+    public function scopeVisible($query)
+    {
+        return $query->where('is_visible', true);
     }
 
     public function rubrique(): BelongsTo
@@ -40,6 +50,7 @@ class SousRubrique extends Model
             'id' => $this->id,
             'position' => $this->position,
             'name' => $this->name,
+            'is_linked' => (bool) $this->is_linked,
         ];
     }
 }

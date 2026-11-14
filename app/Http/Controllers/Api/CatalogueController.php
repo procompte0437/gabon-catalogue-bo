@@ -21,21 +21,21 @@ class CatalogueController extends Controller
 
     public function sousRubriques(Rubrique $rubrique)
     {
-        $rubrique->load('sousRubriques');
-
         return response()->json([
             'rubrique' => $rubrique->toPublicArray(),
-            'sous_rubriques' => $rubrique->sousRubriques->map->toPublicArray()->values(),
+            'sous_rubriques' => $rubrique->sousRubriques()->visible()->get()->map->toPublicArray()->values(),
         ]);
     }
 
     public function articles(SousRubrique $sousRubrique)
     {
         $sousRubrique->load('rubrique', 'articles');
-        $linked = (bool) $sousRubrique->rubrique->is_linked;
+        $linked = (bool) $sousRubrique->is_linked;
 
+        // « rubrique.is_linked » vaut ici le réglage de la sous-rubrique : le site et l'APK
+        // s'en servent pour afficher le champ « Lien du site » et ouvrir les liens.
         return response()->json([
-            'rubrique' => $sousRubrique->rubrique->toPublicArray(),
+            'rubrique' => ['is_linked' => $linked] + $sousRubrique->rubrique->toPublicArray(),
             'sous_rubrique' => $sousRubrique->toPublicArray(),
             'articles' => $sousRubrique->articles
                 ->map(fn ($article) => $article->toPublicArray($linked))

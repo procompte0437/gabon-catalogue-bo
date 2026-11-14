@@ -43,10 +43,12 @@ class CatalogueSeeder extends Seeder
 
         $rubriqueIds = DB::table('rubriques')->orderBy('position')->pluck('id');
         $sousRows = [];
+        $linkedId = DB::table('rubriques')->where('position', $linked)->value('id');
         foreach ($rubriqueIds as $rubriqueId) {
             for ($position = 1; $position <= $sousCount; $position++) {
                 $sousRows[] = [
                     'rubrique_id' => $rubriqueId,
+                    'is_linked' => $rubriqueId === $linkedId ? 1 : 0,
                     'position' => $position,
                     'name' => "Sous-rubrique {$position}",
                     'code' => $code,

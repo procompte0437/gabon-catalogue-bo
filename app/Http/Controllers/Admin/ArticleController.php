@@ -33,12 +33,13 @@ class ArticleController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:20'],
             'code' => ['required', 'regex:/^\d{4}$/'],
-            'link' => ['nullable', 'string', 'max:500'],
+            'link' => ['nullable', 'string', 'max:4000'],
             'image' => ['nullable', 'image', 'max:8192'],
         ], [
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 20 caractères.',
             'code.regex' => 'Le mot de passe doit contenir exactement 4 chiffres.',
+            'link.max' => 'Le lien ne peut pas dépasser 4000 caractères.',
             'image.image' => 'Le fichier doit être une photo.',
             'image.max' => 'La photo ne peut pas dépasser 8 Mo.',
         ]);
@@ -46,7 +47,7 @@ class ArticleController extends Controller
         $article->title = $data['title'];
         $article->code = $data['code'];
 
-        if ($article->sousRubrique->rubrique->is_linked) {
+        if ($article->sousRubrique->is_linked) {
             $article->link = WebLink::normalize($data['link'] ?? null);
         }
 
